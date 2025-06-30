@@ -1,0 +1,26 @@
+# macOS 系统文件
+.DS_Store
+
+# Python 虚拟环境
+venv/
+env/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 配置/密钥（安全）
+.env
+*.key
+*.pem
+*.crt
+*.cfg
+*.conf
+*.json
+
+# 视频/数据（视情况保留）
+data/
+*.mp4
+*.avi
+

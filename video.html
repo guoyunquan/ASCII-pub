@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博丁真视频生成器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0a0a0a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #111;
+            padding: 20px;
+            text-align: center;
+            font-size: 2rem;
+            color: #ff6b35;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #00ffcc;
+            color: #0a0a0a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #008c73;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .left-panel {
+            width: 30%;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select {
+            background-color: #1a1a1a;
+            border: 1px solid #ff6b35;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1rem;
+            color: #ff6b35;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            z-index: 3;
+        }
+
+        .custom-select:hover {
+            border-color: #ff8c5a;
+        }
+
+        .custom-select-options {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background-color: #1a1a1a;
+            border: 1px solid #ff6b35;
+            border-radius: 8px;
+            display: none;
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+        }
+
+        .custom-select-options.active {
+            display: block;
+        }
+
+        .custom-select-options div {
+            padding: 10px;
+            color: #ff6b35;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .custom-select-options div:hover {
+            background-color: #ff6b35;
+            color: #1a1a1a;
+        }
+
+        .drag-area {
+            flex-grow: 1;
+            background-color: #333;
+            border: 2px dashed #ff6b35;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .drag-area.disabled {
+            cursor: not-allowed;
+            background-color: #555;
+            border-color: #888;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ff6b35;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .drag-area p {
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .drag-area .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .input-container input[type="file"] {
+            display: none;
+        }
+
+        .input-container label {
+            padding: 12px 24px;
+            background-color: #ff6b35;
+            color: #0a0a0a;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .input-container label:hover {
+            background-color: #e55a2b;
+        }
+
+        .generate-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            background-color: #ff6b35;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .generate-button[disabled] {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .right-panel {
+            width: 65%;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 1px solid #ff6b35;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #ffaa80);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #ff6b35;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+
+
+        .original-video {
+            display: none;
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 255, 204, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .original-video.show {
+            display: block;
+        }
+
+
+
+        .placeholder-text {
+            color: #666;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <button class="back-button" onclick="window.location.href='index.html'">返回</button>
+    赛博丁真视频生成器
+</header>
+
+<div class="container">
+    <div class="left-panel">
+        <div class="form-group">
+            <label>转换质量</label>
+            <div class="custom-select-container">
+                <div class="custom-select" id="qualitySelect">标准</div>
+                <div class="custom-select-options" id="qualityOptions"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>字符密度</label>
+            <div class="custom-select-container">
+                <div class="custom-select" id="densitySelect">中等</div>
+                <div class="custom-select-options" id="densityOptions"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>小窗大小</label>
+            <div class="custom-select-container">
+                <div class="custom-select" id="opacitySelect">30%</div>
+                <div class="custom-select-options" id="opacityOptions"></div>
+            </div>
+        </div>
+        <div class="drag-area" id="drag-area">
+            <!-- <div class="upload-icon">🎬</div> -->
+            <p>拖拽视频文件到此处</p>
+            <div class="subtitle">支持 MP4, AVI, MOV 等格式</div>
+            <div class="input-container">
+                <input type="file" id="fileInput" accept="video/*" />
+                <label for="fileInput">选择视频文件</label>
+            </div>
+        </div>
+        <button class="generate-button" id="generateButton" disabled>开始生成ASCII视频</button>
+    </div>
+
+    <div class="right-panel">
+        <!-- 原视频预览 -->
+        <video class="original-video" id="originalVideo" controls>
+            您的浏览器不支持视频播放。
+        </video>
+        
+        <!-- 进度显示 -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-text" id="progressText">准备中...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText">等待开始...</div>
+        </div>
+        
+
+        
+        <!-- 占位文本 -->
+        <div class="placeholder-text" id="placeholderText">
+            选择视频文件开始生成ASCII艺术视频
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const qualitySelect = document.getElementById("qualitySelect");
+        const qualityOptions = document.getElementById("qualityOptions");
+        const densitySelect = document.getElementById("densitySelect");
+        const densityOptions = document.getElementById("densityOptions");
+        const opacitySelect = document.getElementById("opacitySelect");
+        const opacityOptions = document.getElementById("opacityOptions");
+        const fileInput = document.getElementById("fileInput");
+        const dragArea = document.getElementById("drag-area");
+        const generateButton = document.getElementById("generateButton");
+        const progressContainer = document.getElementById("progressContainer");
+        const progressFill = document.getElementById("progressFill");
+        const progressText = document.getElementById("progressText");
+        const statusText = document.getElementById("statusText");
+        const originalVideo = document.getElementById("originalVideo");
+        const placeholderText = document.getElementById("placeholderText");
+
+        let selectedFile = null;
+        let websocket = null;
+        let isGenerating = false;
+
+        // 选择框配置
+        const qualityMapping = {
+            "简单": "simple",
+            "标准": "complex"
+           
+        };
+
+        const densityMapping = {
+            "低": "60",
+            "中等": "80", 
+            "高": "120",
+            "超高": "160"
+        };
+
+        const opacityMapping = {
+            "10%": "0.1",
+            "20%": "0.2",
+            "30%": "0.3",
+            "40%": "0.4",
+            "50%": "0.5"
+        };
+
+        // 初始化选择框
+        function populateOptions(container, options) {
+            container.innerHTML = "";
+            options.forEach(option => {
+                const div = document.createElement("div");
+                div.textContent = option;
+                div.dataset.value = option;
+                container.appendChild(div);
+            });
+        }
+
+        function setupCustomSelect(select, optionsContainer, callback) {
+            select.addEventListener("click", () => {
+                if (!isGenerating) {
+                    optionsContainer.classList.toggle("active");
+                }
+            });
+
+            optionsContainer.addEventListener("click", (event) => {
+                if (event.target.dataset.value && !isGenerating) {
+                    select.textContent = event.target.textContent;
+                    optionsContainer.classList.remove("active");
+                    callback(event.target.dataset.value);
+                }
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!select.contains(event.target) && !optionsContainer.contains(event.target)) {
+                    optionsContainer.classList.remove("active");
+                }
+            });
+        }
+
+        // 设置选择框
+        populateOptions(qualityOptions, Object.keys(qualityMapping));
+        populateOptions(densityOptions, Object.keys(densityMapping));
+        populateOptions(opacityOptions, Object.keys(opacityMapping));
+
+        setupCustomSelect(qualitySelect, qualityOptions, (selectedQuality) => {
+            console.log("选中的质量:", selectedQuality);
+        });
+
+        setupCustomSelect(densitySelect, densityOptions, (selectedDensity) => {
+            console.log("选中的密度:", selectedDensity);
+        });
+
+        setupCustomSelect(opacitySelect, opacityOptions, (selectedOpacity) => {
+            console.log("选中的透明度:", selectedOpacity);
+        });
+
+        // 文件拖拽处理
+        dragArea.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            if (!isGenerating) {
+                dragArea.style.borderColor = "#ff6b35";
+            }
+        });
+
+        dragArea.addEventListener("dragleave", () => {
+            dragArea.style.borderColor = "#ff6b35";
+        });
+
+        dragArea.addEventListener("drop", (event) => {
+            event.preventDefault();
+            if (isGenerating) return;
+            
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith("video/")) {
+                handleFileSelect(file);
+            } else {
+                alert("请选择视频文件！");
+            }
+        });
+
+        fileInput.addEventListener("change", (event) => {
+            if (isGenerating) return;
+            
+            const file = event.target.files[0];
+            if (file && file.type.startsWith("video/")) {
+                handleFileSelect(file);
+            } else {
+                alert("请选择视频文件！");
+            }
+        });
+
+        // 点击文件输入框时重置value，确保相同文件也能触发change事件
+        fileInput.addEventListener("click", () => {
+            if (!isGenerating) {
+                fileInput.value = "";
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            generateButton.disabled = false;
+            
+            // 释放之前的视频URL（如果存在）
+            if (originalVideo.src && originalVideo.src.startsWith('blob:')) {
+                URL.revokeObjectURL(originalVideo.src);
+            }
+            
+            // 显示原视频预览
+            const videoURL = URL.createObjectURL(file);
+            originalVideo.src = videoURL;
+            originalVideo.classList.add("show");
+            
+            // 强制重新加载视频
+            originalVideo.load();
+            
+            // 隐藏占位文本
+            placeholderText.style.display = "none";
+            
+            // 重置其他界面元素
+            progressContainer.classList.remove("show");
+            
+            // 清理之前的状态
+            placeholderText.textContent = "";
+        }
+
+        function toggleGenerating(state) {
+            isGenerating = state;
+            generateButton.disabled = state;
+            dragArea.classList.toggle("disabled", state);
+            fileInput.disabled = state;
+            
+            // 禁用选择框
+            qualitySelect.style.pointerEvents = state ? "none" : "auto";
+            densitySelect.style.pointerEvents = state ? "none" : "auto";
+            opacitySelect.style.pointerEvents = state ? "none" : "auto";
+            qualitySelect.style.opacity = state ? "0.5" : "1";
+            densitySelect.style.opacity = state ? "0.5" : "1";
+            opacitySelect.style.opacity = state ? "0.5" : "1";
+            
+            if (state) {
+                generateButton.textContent = "生成中...";
+                // 隐藏原视频，显示进度
+                originalVideo.classList.remove("show");
+                // 清理之前的状态文本
+                placeholderText.style.display = "none";
+                placeholderText.textContent = "";
+                // 重置进度条状态
+                progressFill.style.width = "0%";
+                progressText.textContent = "0%";
+                statusText.textContent = "准备开始...";
+            } else {
+                generateButton.textContent = "开始生成ASCII视频";
+            }
+        }
+
+        function connectWebSocket(taskId) {
+            
+            const wsUrl = `wss://ascii.gyq-me.top/video/ws/${taskId}`;
+            // const wsUrl = `ws://localhost:8000/video/ws/${taskId}`;
+            websocket = new WebSocket(wsUrl);
+
+            websocket.onopen = () => {
+                console.log("WebSocket连接已建立");
+                progressContainer.classList.add("show");
+            };
+
+            websocket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("收到消息:", data);
+
+                    if (data.type === "progress") {
+                        // 确保progress值在合理范围内
+                        let progress = Math.round(Math.max(0, Math.min(100, data.progress || 0)));
+                        
+                        console.log(`进度更新: ${progress}%`);
+                        
+                        progressFill.style.width = `${progress}%`;
+                        progressText.textContent = `${progress}%`;
+                        statusText.textContent = data.message || "处理中...";
+                        
+                        // 确保进度条仍然可见
+                        if (!progressContainer.classList.contains("show")) {
+                            progressContainer.classList.add("show");
+                        }
+                        
+                    } else if (data.type === "completed") {
+                        console.log("任务完成，准备显示视频");
+                        
+                        progressFill.style.width = "100%";
+                        progressText.textContent = "100%";
+                        statusText.textContent = "完成！";
+                        
+                        // 隐藏进度条
+                        setTimeout(() => {
+                            progressContainer.classList.remove("show");
+                            
+                            console.log("设置视频URL:", data.video_url);
+                            
+                            // 将生成的ASCII视频显示在原位置
+                            originalVideo.src = data.video_url;
+                            originalVideo.classList.add("show");
+                            
+                            // 添加视频加载事件监听
+                            originalVideo.onloadeddata = () => {
+                                console.log("ASCII视频加载成功");
+                                // 视频加载成功，不需要显示额外提示
+                                placeholderText.style.display = "none";
+                            };
+                            
+                            originalVideo.onerror = (e) => {
+                                console.error("视频加载失败:", e);
+                                placeholderText.textContent = "视频预览失败，但文件已下载成功";
+                                placeholderText.style.display = "block";
+                                placeholderText.style.color = "#ff6b35";
+                            };
+                            
+                            // 强制重新加载视频
+                            originalVideo.load();
+                            
+                        }, 1000);
+                        
+                        toggleGenerating(false);
+                        websocket.close();
+                        
+                    } else if (data.type === "error") {
+                        console.error("任务错误:", data.message);
+                        statusText.textContent = `错误: ${data.message}`;
+                        toggleGenerating(false);
+                        websocket.close();
+                        
+                    } else {
+                        console.warn("未知消息类型:", data.type, data);
+                    }
+                    
+                } catch (error) {
+                    console.error("解析WebSocket消息失败:", error, event.data);
+                    statusText.textContent = "消息解析错误";
+                }
+            };
+
+            websocket.onerror = (error) => {
+                console.error("WebSocket错误:", error);
+                statusText.textContent = "连接错误，请重试";
+                toggleGenerating(false);
+            };
+
+            websocket.onclose = () => {
+                console.log("WebSocket连接已关闭");
+            };
+        }
+
+        generateButton.addEventListener("click", async () => {
+            if (!selectedFile || isGenerating) {
+                return;
+            }
+
+            toggleGenerating(true);
+
+            const quality = qualityMapping[qualitySelect.textContent.trim()];
+            const density = densityMapping[densitySelect.textContent.trim()];
+            const opacity = opacityMapping[opacitySelect.textContent.trim()];
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            formData.append("overlay_ratio", opacity);
+            formData.append("mode", quality);
+            formData.append("num_cols", density);
+
+            try {
+                const response = await fetch("https://ascii.gyq-me.top/video/convert_video_ws", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("启动视频转换失败！");
+                }
+
+                const result = await response.json();
+                const taskId = result.task_id;
+                
+                // 连接WebSocket监听进度
+                connectWebSocket(taskId);
+
+            } catch (error) {
+                alert(`生成失败：${error.message}`);
+                toggleGenerating(false);
+            }
+        });
+    });
+</script>
+</body>
+
+</html> 
